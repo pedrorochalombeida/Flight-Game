@@ -371,6 +371,7 @@ function keyUp(e) {
   }
 }
 
+
 function toggleMusic() {
   if (isMusicPlaying) {
     backgroundMusic.pause();
