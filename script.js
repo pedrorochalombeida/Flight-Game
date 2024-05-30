@@ -76,6 +76,7 @@ function resetGame() {
   stars = [];
   score = 0;
   level = 1;
+  lives = 3; // Asegúrate de inicializar las vidas
   gameOver = false;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -193,6 +194,12 @@ function drawStars() {
   });
 }
 
+
+function playShootSound() {
+  const shootSoundClone = shootSound.cloneNode(); // Clona el nodo de audio
+  shootSoundClone.play();
+}
+
 function collisionDetection(obj1, obj2) {
   return (
     obj1.x < obj2.x + obj2.width &&
@@ -263,22 +270,52 @@ function levelUp() {
   backgroundMusic.play();
 }
 function endGame() {
-  lives--; // Disminuir la vida
-  // Mostrar el mensaje de Game Over con la opción de continuar si quedan vidas
-  if (lives > 0) {
-    alert("¡Has perdido una vida! Continúa en el mismo nivel.");
-    resetGame();
-    update();
-  } else {
-    ctx.fillText(
-      `Game Over! Final Score: ${score}`,
-      canvas.width / 2 - 80,
-      canvas.height / 2
-    );
-    canvas.style.display = "none";
-    gameOverScreen.style.display = "flex";
+  gameOver = true;
+  canvas.style.display = "none"; // Esconde el canvas de juego
+  gameOverScreen.style.display = "flex"; // Muestra la pantalla de Game Over
+}
+let shooting = false;
+let shootInterval;
+function keyDown(e) {
+  if (e.key === "ArrowRight" || e.key === "Right") {
+    spaceship.dx = spaceship.speed;
+  } else if (e.key === "ArrowLeft" || e.key === "Left") {
+    spaceship.dx = -spaceship.speed;
+  } else if (e.key === "ArrowUp" || e.key === "Up") {
+    spaceship.dy = -spaceship.speed;
+  } else if (e.key === "ArrowDown" || e.key === "Down") {
+    spaceship.dy = spaceship.speed;
+  } else if (e.key === " " || e.key === "Spacebar") {
+    e.preventDefault(); // Evita el comportamiento predeterminado de la barra espaciadora
+    createBullet();
+    playShootSound();
+      shootInterval = setInterval(() => {
+        createBullet();
+        playShootSound();
+      }, 200); // Ajusta el intervalo según la velocidad deseada de disparo
+    console.log("Bullet created", bullets); // Depuración: Verificar que las balas se creen
   }
 }
+
+function keyUp(e) {
+  if (
+    e.key === "ArrowRight" ||
+    e.key === "Right" ||
+    e.key === "ArrowLeft" ||
+    e.key === "Left" ||
+    e.key === "ArrowUp" ||
+    e.key === "Up" ||
+    e.key === "ArrowDown" ||
+    e.key === "Down"
+  ) {
+    spaceship.dx = 0;
+    spaceship.dy = 0;
+  } else if (e.key === " " || e.key === "Spacebar") {
+    shooting = false;
+    clearInterval(shootInterval);
+  }
+}
+
 
 function startGame() {
   spaceshipImg.src = spaceshipSelect.value;
